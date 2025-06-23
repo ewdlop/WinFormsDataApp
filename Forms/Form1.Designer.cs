@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             pictureBoxChart = new PictureBox();
-            panelControls = new Panel();
+            panelControls = new TableLayoutPanel();
             groupBoxExport = new GroupBox();
             buttonExportData = new Button();
             buttonExportTechnical = new Button();
@@ -112,15 +112,23 @@
             panelControls.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panelControls.AutoScroll = true;
             panelControls.BackColor = Color.LightGray;
-            panelControls.BorderStyle = BorderStyle.FixedSingle;
-            panelControls.Controls.Add(groupBoxExport);
-            panelControls.Controls.Add(groupBoxTechnical);
-            panelControls.Controls.Add(groupBoxNoise);
-            panelControls.Controls.Add(groupBoxAnalysis);
-            panelControls.Controls.Add(groupBoxGenerator);
+            panelControls.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+            panelControls.ColumnCount = 3;
+            panelControls.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            panelControls.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            panelControls.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.34F));
+            panelControls.Controls.Add(groupBoxGenerator, 0, 0);
+            panelControls.Controls.Add(groupBoxAnalysis, 1, 0);
+            panelControls.Controls.Add(groupBoxNoise, 2, 0);
+            panelControls.Controls.Add(groupBoxTechnical, 0, 1);
+            panelControls.Controls.Add(groupBoxBacktest, 1, 1);
+            panelControls.Controls.Add(groupBoxExport, 2, 1);
             panelControls.Location = new Point(17, 1000);
             panelControls.Margin = new Padding(4, 5, 4, 5);
             panelControls.Name = "panelControls";
+            panelControls.RowCount = 2;
+            panelControls.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            panelControls.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             panelControls.Size = new Size(1142, 415);
             panelControls.TabIndex = 1;
             // 
@@ -130,11 +138,10 @@
             groupBoxExport.Controls.Add(buttonExportTechnical);
             groupBoxExport.Controls.Add(buttonExportStats);
             groupBoxExport.Controls.Add(buttonExportJSON);
-            groupBoxExport.Location = new Point(462, 358);
+            groupBoxExport.Dock = DockStyle.Fill;
             groupBoxExport.Margin = new Padding(4, 5, 4, 5);
             groupBoxExport.Name = "groupBoxExport";
             groupBoxExport.Padding = new Padding(4, 5, 4, 5);
-            groupBoxExport.Size = new Size(523, 286);
             groupBoxExport.TabIndex = 5;
             groupBoxExport.TabStop = false;
             groupBoxExport.Text = "匯出";
@@ -192,11 +199,10 @@
             groupBoxBacktest.Controls.Add(labelShortMA);
             groupBoxBacktest.Controls.Add(labelLongMA);
             groupBoxBacktest.Controls.Add(labelInitialCapital);
-            groupBoxBacktest.Location = new Point(9, 137);
+            groupBoxBacktest.Dock = DockStyle.Fill;
             groupBoxBacktest.Margin = new Padding(4, 5, 4, 5);
             groupBoxBacktest.Name = "groupBoxBacktest";
             groupBoxBacktest.Padding = new Padding(4, 5, 4, 5);
-            groupBoxBacktest.Size = new Size(440, 317);
             groupBoxBacktest.TabIndex = 4;
             groupBoxBacktest.TabStop = false;
             groupBoxBacktest.Text = "回測";
@@ -236,10 +242,10 @@
             // 
             // buttonRunBacktest
             // 
-            buttonRunBacktest.Location = new Point(9, 186);
+            buttonRunBacktest.Location = new Point(9, 170);
             buttonRunBacktest.Margin = new Padding(4, 5, 4, 5);
             buttonRunBacktest.Name = "buttonRunBacktest";
-            buttonRunBacktest.Size = new Size(143, 50);
+            buttonRunBacktest.Size = new Size(143, 30);
             buttonRunBacktest.TabIndex = 6;
             buttonRunBacktest.Text = "執行回測";
             buttonRunBacktest.UseVisualStyleBackColor = true;
@@ -284,11 +290,10 @@
             groupBoxTechnical.Controls.Add(numericUpDownEMA);
             groupBoxTechnical.Controls.Add(buttonCalculateTechnical);
             groupBoxTechnical.Controls.Add(labelEMA);
-            groupBoxTechnical.Location = new Point(462, 17);
+            groupBoxTechnical.Dock = DockStyle.Fill;
             groupBoxTechnical.Margin = new Padding(4, 5, 4, 5);
             groupBoxTechnical.Name = "groupBoxTechnical";
             groupBoxTechnical.Padding = new Padding(4, 5, 4, 5);
-            groupBoxTechnical.Size = new Size(505, 317);
             groupBoxTechnical.TabIndex = 3;
             groupBoxTechnical.TabStop = false;
             groupBoxTechnical.Text = "技術指標";
@@ -350,10 +355,10 @@
             // 
             // buttonCalculateTechnical
             // 
-            buttonCalculateTechnical.Location = new Point(171, 250);
+            buttonCalculateTechnical.Location = new Point(171, 200);
             buttonCalculateTechnical.Margin = new Padding(4, 5, 4, 5);
             buttonCalculateTechnical.Name = "buttonCalculateTechnical";
-            buttonCalculateTechnical.Size = new Size(107, 50);
+            buttonCalculateTechnical.Size = new Size(107, 30);
             buttonCalculateTechnical.TabIndex = 7;
             buttonCalculateTechnical.Text = "計算指標";
             buttonCalculateTechnical.UseVisualStyleBackColor = true;
@@ -372,24 +377,22 @@
             // groupBoxNoise
             // 
             groupBoxNoise.Controls.Add(buttonAddNoise);
-            groupBoxNoise.Controls.Add(groupBoxBacktest);
             groupBoxNoise.Controls.Add(numericUpDownNoiseLevel);
             groupBoxNoise.Controls.Add(label6);
-            groupBoxNoise.Location = new Point(14, 517);
+            groupBoxNoise.Dock = DockStyle.Fill;
             groupBoxNoise.Margin = new Padding(4, 5, 4, 5);
             groupBoxNoise.Name = "groupBoxNoise";
             groupBoxNoise.Padding = new Padding(4, 5, 4, 5);
-            groupBoxNoise.Size = new Size(440, 150);
             groupBoxNoise.TabIndex = 2;
             groupBoxNoise.TabStop = false;
             groupBoxNoise.Text = "雜訊生成";
             // 
             // buttonAddNoise
             // 
-            buttonAddNoise.Location = new Point(71, 250);
+            buttonAddNoise.Location = new Point(71, 120);
             buttonAddNoise.Margin = new Padding(4, 5, 4, 5);
             buttonAddNoise.Name = "buttonAddNoise";
-            buttonAddNoise.Size = new Size(143, 50);
+            buttonAddNoise.Size = new Size(143, 30);
             buttonAddNoise.TabIndex = 2;
             buttonAddNoise.Text = "添加雜訊";
             buttonAddNoise.UseVisualStyleBackColor = true;
@@ -422,21 +425,20 @@
             groupBoxAnalysis.Controls.Add(buttonAnalyze);
             groupBoxAnalysis.Controls.Add(numericUpDownMA);
             groupBoxAnalysis.Controls.Add(checkBoxMovingAverage);
-            groupBoxAnalysis.Location = new Point(14, 344);
+            groupBoxAnalysis.Dock = DockStyle.Fill;
             groupBoxAnalysis.Margin = new Padding(4, 5, 4, 5);
             groupBoxAnalysis.Name = "groupBoxAnalysis";
             groupBoxAnalysis.Padding = new Padding(4, 5, 4, 5);
-            groupBoxAnalysis.Size = new Size(440, 156);
             groupBoxAnalysis.TabIndex = 1;
             groupBoxAnalysis.TabStop = false;
             groupBoxAnalysis.Text = "技術分析";
             // 
             // buttonAnalyze
             // 
-            buttonAnalyze.Location = new Point(71, 250);
+            buttonAnalyze.Location = new Point(71, 120);
             buttonAnalyze.Margin = new Padding(4, 5, 4, 5);
             buttonAnalyze.Name = "buttonAnalyze";
-            buttonAnalyze.Size = new Size(143, 50);
+            buttonAnalyze.Size = new Size(143, 30);
             buttonAnalyze.TabIndex = 2;
             buttonAnalyze.Text = "執行分析";
             buttonAnalyze.UseVisualStyleBackColor = true;
@@ -479,11 +481,10 @@
             groupBoxGenerator.Controls.Add(label3);
             groupBoxGenerator.Controls.Add(label2);
             groupBoxGenerator.Controls.Add(label1);
-            groupBoxGenerator.Location = new Point(14, 17);
+            groupBoxGenerator.Dock = DockStyle.Fill;
             groupBoxGenerator.Margin = new Padding(4, 5, 4, 5);
             groupBoxGenerator.Name = "groupBoxGenerator";
             groupBoxGenerator.Padding = new Padding(4, 5, 4, 5);
-            groupBoxGenerator.Size = new Size(440, 317);
             groupBoxGenerator.TabIndex = 0;
             groupBoxGenerator.TabStop = false;
             groupBoxGenerator.Text = "隨機過程生成器";
@@ -493,7 +494,7 @@
             buttonGenerate.Location = new Point(286, 250);
             buttonGenerate.Margin = new Padding(4, 5, 4, 5);
             buttonGenerate.Name = "buttonGenerate";
-            buttonGenerate.Size = new Size(129, 50);
+            buttonGenerate.Size = new Size(129, 30);
             buttonGenerate.TabIndex = 10;
             buttonGenerate.Text = "生成數據";
             buttonGenerate.UseVisualStyleBackColor = true;
@@ -611,7 +612,7 @@
             // 
             dataGridView1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(1186, 833);
+            dataGridView1.Location = new Point(1186, 1000);
             dataGridView1.Margin = new Padding(4, 5, 4, 5);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.RowHeadersWidth = 62;
@@ -677,7 +678,7 @@
         #endregion
 
         private System.Windows.Forms.PictureBox pictureBoxChart;
-        private Panel panelControls;
+        private TableLayoutPanel panelControls;
         private GroupBox groupBoxGenerator;
         private Button buttonGenerate;
         private NumericUpDown numericUpDownDays;

@@ -27,40 +27,37 @@ namespace WinFormsApp3
         private void Form1_Load(object sender, EventArgs e)
         {
             // 確保表單以最大化狀態載入
-            //this.WindowState = FormWindowState.Maximized;
+            this.WindowState = FormWindowState.Maximized;
             
             // 調整控件位置以適應全屏
-            //AdjustControlsForFullScreen();
+            AdjustControlsForFullScreen();
         }
 
         private void AdjustControlsForFullScreen()
         {
-            // 重新計算控件位置以適應螢幕大小
-            int screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
-            int screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
+            //// 重新計算控件位置以適應螢幕大小
+            //int screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
+            //int screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
             
-            // 調整圖表大小
-            pictureBoxChart.Width = screenWidth - 630; // 為右側統計區域留空間
-            pictureBoxChart.Height = screenHeight - 280; // 為底部控件面板留空間
+            //// 調整圖表大小
+            //pictureBoxChart.Width = screenWidth - 630; // 為右側統計區域留空間
+            //pictureBoxChart.Height = screenHeight - 350; // 為底部控件面板留空間
             
-            // 調整統計標籤位置
-            labelStats.Left = pictureBoxChart.Right + 20;
-            labelStats.Width = screenWidth - labelStats.Left - 20;
-            labelStats.Height = (screenHeight - 280) / 2 - 10;
+            //// 調整統計標籤位置
+            //labelStats.Left = pictureBoxChart.Right + 20;
+            //labelStats.Width = screenWidth - labelStats.Left - 20;
+            //labelStats.Height = (screenHeight - 350) / 2 - 10;
             
-            // 調整數據網格位置
-            dataGridView1.Left = labelStats.Left;
-            dataGridView1.Top = labelStats.Bottom + 10;
-            dataGridView1.Width = labelStats.Width;
-            dataGridView1.Height = labelStats.Height;
+            //// 調整數據網格位置
+            //dataGridView1.Left = labelStats.Left;
+            //dataGridView1.Top = labelStats.Bottom + 10;
+            //dataGridView1.Width = labelStats.Width;
+            //dataGridView1.Height = labelStats.Height;
             
-            // 調整控件面板位置和大小
-            panelControls.Top = pictureBoxChart.Bottom + 10;
-            panelControls.Width = pictureBoxChart.Width;
-            panelControls.Height = 250; // 固定高度以顯示滾動條
-            
-            // 設定控件面板的AutoScrollMinSize以確保滾動功能正常
-            panelControls.AutoScrollMinSize = new Size(760, 610); // 總內容高度約610px
+            //// 調整TableLayoutPanel位置和大小
+            //panelControls.Top = pictureBoxChart.Bottom + 10;
+            //panelControls.Width = pictureBoxChart.Width;
+            //panelControls.Height = 320; // 增加高度以容納2行控件
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -68,7 +65,7 @@ namespace WinFormsApp3
             // 當窗體大小改變時重新調整控件
             if (this.WindowState == FormWindowState.Maximized)
             {
-                //AdjustControlsForFullScreen();
+                AdjustControlsForFullScreen();
             }
             
             // 重繪圖表以適應新尺寸
