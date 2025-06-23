@@ -12,29 +12,29 @@ namespace WinFormsApp3
 {
     public partial class Form1 : Form
     {
-        private List<FinancialData>? currentData;
-        private StochasticDataGenerator? dataGenerator;
-        private List<double>? movingAverages;
+        private List<金融數據>? 當前數據;
+        private 隨機數據生成器? 數據生成器;
+        private List<double>? 移動平均值;
 
         public Form1()
         {
             InitializeComponent();
-            Initialize();
+            初始化();
         }
 
-        private void Initialize()
+        private void 初始化()
         {
             // 初始化數據生成器
-            dataGenerator = new StochasticDataGenerator();
+            數據生成器 = new 隨機數據生成器();
             
             // 設置默認值
             comboBoxModel.SelectedIndex = 0; // 默認選擇幾何布朗運動
             
             // 初始化數據網格
-            SetupDataGrid();
+            設置數據網格();
         }
 
-        private void SetupDataGrid()
+        private void 設置數據網格()
         {
             dataGridView1.AutoGenerateColumns = false;
             dataGridView1.Columns.Clear();
@@ -44,14 +44,14 @@ namespace WinFormsApp3
             { 
                 Name = "Date", 
                 HeaderText = "日期", 
-                DataPropertyName = "Date",
+                DataPropertyName = "日期",
                 Width = 80
             });
             dataGridView1.Columns.Add(new DataGridViewTextBoxColumn 
             { 
                 Name = "Close", 
                 HeaderText = "收盤價", 
-                DataPropertyName = "Close",
+                DataPropertyName = "收盤價",
                 DefaultCellStyle = new DataGridViewCellStyle { Format = "F2" },
                 Width = 70
             });
@@ -59,7 +59,7 @@ namespace WinFormsApp3
             { 
                 Name = "Returns", 
                 HeaderText = "報酬率", 
-                DataPropertyName = "Returns",
+                DataPropertyName = "報酬率",
                 DefaultCellStyle = new DataGridViewCellStyle { Format = "P4" },
                 Width = 80
             });
@@ -67,7 +67,7 @@ namespace WinFormsApp3
             { 
                 Name = "Volume", 
                 HeaderText = "成交量", 
-                DataPropertyName = "Volume",
+                DataPropertyName = "成交量",
                 DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" },
                 Width = 100
             });
@@ -77,32 +77,32 @@ namespace WinFormsApp3
         {
             try
             {
-                if (dataGenerator == null) return;
+                if (數據生成器 == null) return;
 
-                double initialPrice = (double)numericUpDownInitialPrice.Value;
-                double drift = (double)numericUpDownDrift.Value;
-                double volatility = (double)numericUpDownVolatility.Value;
-                int days = (int)numericUpDownDays.Value;
-                DateTime startDate = DateTime.Today.AddDays(-days);
+                double 初始價格 = (double)numericUpDownInitialPrice.Value;
+                double 漂移率 = (double)numericUpDownDrift.Value;
+                double 波動率 = (double)numericUpDownVolatility.Value;
+                int 天數 = (int)numericUpDownDays.Value;
+                DateTime 開始日期 = DateTime.Today.AddDays(-天數);
 
                 // 根據選擇的模型生成數據
                 if (comboBoxModel.SelectedIndex == 0) // 幾何布朗運動
                 {
-                    currentData = dataGenerator.GenerateGeometricBrownianMotion(
-                        initialPrice, drift, volatility, days, startDate);
+                    當前數據 = 數據生成器.生成幾何布朗運動(
+                        初始價格, 漂移率, 波動率, 天數, 開始日期);
                 }
                 else // Merton跳躍擴散
                 {
-                    currentData = dataGenerator.GenerateMertonJumpDiffusion(
-                        initialPrice, drift, volatility, 5.0, -0.02, 0.1, days, startDate);
+                    當前數據 = 數據生成器.生成默頓跳躍擴散(
+                        初始價格, 漂移率, 波動率, 5.0, -0.02, 0.1, 天數, 開始日期);
                 }
 
                 // 更新顯示
-                UpdateChart();
-                UpdateDataGrid();
-                UpdateStatistics();
+                更新圖表();
+                更新數據網格();
+                更新統計資訊();
 
-                MessageBox.Show($"成功生成 {days} 天的金融數據！", "數據生成完成", 
+                MessageBox.Show($"成功生成 {天數} 天的金融數據！", "數據生成完成", 
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -114,7 +114,7 @@ namespace WinFormsApp3
 
         private void buttonAnalyze_Click(object sender, EventArgs e)
         {
-            if (currentData == null || !currentData.Any())
+            if (當前數據 == null || !當前數據.Any())
             {
                 MessageBox.Show("請先生成數據再進行分析！", "警告", 
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -125,12 +125,12 @@ namespace WinFormsApp3
             {
                 if (checkBoxMovingAverage.Checked)
                 {
-                    int maPeriod = (int)numericUpDownMA.Value;
-                    movingAverages = FinancialAnalyzer.CalculateMovingAverage(currentData, maPeriod);
+                    int 移動平均週期 = (int)numericUpDownMA.Value;
+                    移動平均值 = 金融分析器.計算移動平均(當前數據, 移動平均週期);
                 }
 
-                UpdateChart();
-                UpdateStatistics();
+                更新圖表();
+                更新統計資訊();
                 MessageBox.Show("技術分析完成！", "分析完成", 
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -143,7 +143,7 @@ namespace WinFormsApp3
 
         private void buttonAddNoise_Click(object sender, EventArgs e)
         {
-            if (currentData == null || !currentData.Any() || dataGenerator == null)
+            if (當前數據 == null || !當前數據.Any() || 數據生成器 == null)
             {
                 MessageBox.Show("請先生成數據再添加雜訊！", "警告", 
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -152,21 +152,21 @@ namespace WinFormsApp3
 
             try
             {
-                double noiseLevel = (double)numericUpDownNoiseLevel.Value;
-                dataGenerator.AddWhiteNoise(currentData, noiseLevel);
+                double 雜訊水平 = (double)numericUpDownNoiseLevel.Value;
+                數據生成器.添加白雜訊(當前數據, 雜訊水平);
 
                 // 重新計算收益率
-                for (int i = 1; i < currentData.Count; i++)
+                for (int i = 1; i < 當前數據.Count; i++)
                 {
-                    currentData[i].Returns = (currentData[i].Close - currentData[i-1].Close) / currentData[i-1].Close;
+                    當前數據[i].報酬率 = (當前數據[i].收盤價 - 當前數據[i-1].收盤價) / 當前數據[i-1].收盤價;
                 }
 
                 // 更新顯示
-                UpdateChart();
-                UpdateDataGrid();
-                UpdateStatistics();
+                更新圖表();
+                更新數據網格();
+                更新統計資訊();
 
-                MessageBox.Show($"成功添加雜訊水平 {noiseLevel:P1}！", "雜訊添加完成", 
+                MessageBox.Show($"成功添加雜訊水平 {雜訊水平:P1}！", "雜訊添加完成", 
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -176,177 +176,177 @@ namespace WinFormsApp3
             }
         }
 
-        private void UpdateChart()
+        private void 更新圖表()
         {
-            if (currentData == null || !currentData.Any()) return;
+            if (當前數據 == null || !當前數據.Any()) return;
             pictureBoxChart.Invalidate(); // 觸發重繪
         }
 
         private void pictureBoxChart_Paint(object sender, PaintEventArgs e)
         {
-            if (currentData == null || !currentData.Any()) return;
+            if (當前數據 == null || !當前數據.Any()) return;
 
-            Graphics g = e.Graphics;
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            Graphics 圖形 = e.Graphics;
+            圖形.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
             // 圖表區域
-            Rectangle chartArea = new Rectangle(60, 30, pictureBoxChart.Width - 80, pictureBoxChart.Height - 60);
+            Rectangle 圖表區域 = new Rectangle(60, 30, pictureBoxChart.Width - 80, pictureBoxChart.Height - 60);
             
             // 背景
-            g.FillRectangle(Brushes.White, chartArea);
-            g.DrawRectangle(Pens.Black, chartArea);
+            圖形.FillRectangle(Brushes.White, 圖表區域);
+            圖形.DrawRectangle(Pens.Black, 圖表區域);
 
             // 計算數據範圍
-            double minPrice = currentData.Min(d => d.Close);
-            double maxPrice = currentData.Max(d => d.Close);
-            double priceRange = maxPrice - minPrice;
-            if (priceRange == 0) priceRange = 1;
+            double 最低價格 = 當前數據.Min(d => d.收盤價);
+            double 最高價格 = 當前數據.Max(d => d.收盤價);
+            double 價格範圍 = 最高價格 - 最低價格;
+            if (價格範圍 == 0) 價格範圍 = 1;
 
             // 繪製網格線
-            using (Pen gridPen = new Pen(Color.LightGray, 1))
+            using (Pen 網格筆 = new Pen(Color.LightGray, 1))
             {
                 // 水平網格線
                 for (int i = 0; i <= 5; i++)
                 {
-                    int y = chartArea.Top + (chartArea.Height * i / 5);
-                    g.DrawLine(gridPen, chartArea.Left, y, chartArea.Right, y);
+                    int y = 圖表區域.Top + (圖表區域.Height * i / 5);
+                    圖形.DrawLine(網格筆, 圖表區域.Left, y, 圖表區域.Right, y);
 
                     // Y軸標籤
-                    double price = maxPrice - (priceRange * i / 5);
-                    g.DrawString(price.ToString("F1"), SystemFonts.DefaultFont, Brushes.Black, 
-                        chartArea.Left - 50, y - 7);
+                    double 價格 = 最高價格 - (價格範圍 * i / 5);
+                    圖形.DrawString(價格.ToString("F1"), SystemFonts.DefaultFont, Brushes.Black, 
+                        圖表區域.Left - 50, y - 7);
                 }
 
                 // 垂直網格線
                 for (int i = 0; i <= 5; i++)
                 {
-                    int x = chartArea.Left + (chartArea.Width * i / 5);
-                    g.DrawLine(gridPen, x, chartArea.Top, x, chartArea.Bottom);
+                    int x = 圖表區域.Left + (圖表區域.Width * i / 5);
+                    圖形.DrawLine(網格筆, x, 圖表區域.Top, x, 圖表區域.Bottom);
                 }
             }
 
             // 繪製價格線
-            if (currentData.Count > 1)
+            if (當前數據.Count > 1)
             {
-                List<PointF> pricePoints = new List<PointF>();
-                for (int i = 0; i < currentData.Count; i++)
+                List<PointF> 價格點 = new List<PointF>();
+                for (int i = 0; i < 當前數據.Count; i++)
                 {
-                    float x = chartArea.Left + (float)(chartArea.Width * i / (currentData.Count - 1));
-                    float y = chartArea.Bottom - (float)(chartArea.Height * (currentData[i].Close - minPrice) / priceRange);
-                    pricePoints.Add(new PointF(x, y));
+                    float x = 圖表區域.Left + (float)(圖表區域.Width * i / (當前數據.Count - 1));
+                    float y = 圖表區域.Bottom - (float)(圖表區域.Height * (當前數據[i].收盤價 - 最低價格) / 價格範圍);
+                    價格點.Add(new PointF(x, y));
                 }
 
-                if (pricePoints.Count > 1)
+                if (價格點.Count > 1)
                 {
-                    using (Pen pricePen = new Pen(Color.Blue, 2))
+                    using (Pen 價格筆 = new Pen(Color.Blue, 2))
                     {
-                        g.DrawLines(pricePen, pricePoints.ToArray());
+                        圖形.DrawLines(價格筆, 價格點.ToArray());
                     }
                 }
             }
 
             // 繪製移動平均線
-            if (movingAverages != null && checkBoxMovingAverage.Checked)
+            if (移動平均值 != null && checkBoxMovingAverage.Checked)
             {
-                List<PointF> maPoints = new List<PointF>();
-                for (int i = 0; i < currentData.Count; i++)
+                List<PointF> 移動平均點 = new List<PointF>();
+                for (int i = 0; i < 當前數據.Count; i++)
                 {
-                    if (!double.IsNaN(movingAverages[i]))
+                    if (!double.IsNaN(移動平均值[i]))
                     {
-                        float x = chartArea.Left + (float)(chartArea.Width * i / (currentData.Count - 1));
-                        float y = chartArea.Bottom - (float)(chartArea.Height * (movingAverages[i] - minPrice) / priceRange);
-                        maPoints.Add(new PointF(x, y));
+                        float x = 圖表區域.Left + (float)(圖表區域.Width * i / (當前數據.Count - 1));
+                        float y = 圖表區域.Bottom - (float)(圖表區域.Height * (移動平均值[i] - 最低價格) / 價格範圍);
+                        移動平均點.Add(new PointF(x, y));
                     }
                 }
 
-                if (maPoints.Count > 1)
+                if (移動平均點.Count > 1)
                 {
-                    using (Pen maPen = new Pen(Color.Red, 2))
+                    using (Pen 移動平均筆 = new Pen(Color.Red, 2))
                     {
-                        maPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                        g.DrawLines(maPen, maPoints.ToArray());
+                        移動平均筆.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                        圖形.DrawLines(移動平均筆, 移動平均點.ToArray());
                     }
                 }
             }
 
             // 繪製圖例
-            int legendY = 10;
-            g.FillRectangle(Brushes.Blue, 10, legendY, 15, 3);
-            g.DrawString("收盤價", SystemFonts.DefaultFont, Brushes.Black, 30, legendY - 2);
+            int 圖例Y = 10;
+            圖形.FillRectangle(Brushes.Blue, 10, 圖例Y, 15, 3);
+            圖形.DrawString("收盤價", SystemFonts.DefaultFont, Brushes.Black, 30, 圖例Y - 2);
 
-            if (movingAverages != null && checkBoxMovingAverage.Checked)
+            if (移動平均值 != null && checkBoxMovingAverage.Checked)
             {
-                using (Pen legendPen = new Pen(Color.Red, 3))
+                using (Pen 圖例筆 = new Pen(Color.Red, 3))
                 {
-                    legendPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                    g.DrawLine(legendPen, 100, legendY + 1, 115, legendY + 1);
+                    圖例筆.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                    圖形.DrawLine(圖例筆, 100, 圖例Y + 1, 115, 圖例Y + 1);
                 }
-                g.DrawString("移動平均", SystemFonts.DefaultFont, Brushes.Black, 120, legendY - 2);
+                圖形.DrawString("移動平均", SystemFonts.DefaultFont, Brushes.Black, 120, 圖例Y - 2);
             }
 
             // 軸標籤
-            g.DrawString("價格", SystemFonts.DefaultFont, Brushes.Black, 10, chartArea.Top + chartArea.Height / 2);
-            g.DrawString("時間", SystemFonts.DefaultFont, Brushes.Black, chartArea.Left + chartArea.Width / 2, chartArea.Bottom + 20);
+            圖形.DrawString("價格", SystemFonts.DefaultFont, Brushes.Black, 10, 圖表區域.Top + 圖表區域.Height / 2);
+            圖形.DrawString("時間", SystemFonts.DefaultFont, Brushes.Black, 圖表區域.Left + 圖表區域.Width / 2, 圖表區域.Bottom + 20);
         }
 
-        private void UpdateDataGrid()
+        private void 更新數據網格()
         {
-            if (currentData == null || !currentData.Any()) return;
+            if (當前數據 == null || !當前數據.Any()) return;
 
-            dataGridView1.DataSource = currentData.TakeLast(50).ToList(); // 只顯示最後50筆數據
+            dataGridView1.DataSource = 當前數據.TakeLast(50).ToList(); // 只顯示最後50筆數據
         }
 
-        private void UpdateStatistics()
+        private void 更新統計資訊()
         {
-            if (currentData == null || !currentData.Any()) return;
+            if (當前數據 == null || !當前數據.Any()) return;
 
             try
             {
                 // 計算統計指標
-                double currentPrice = currentData.Last().Close;
-                double initialPrice = currentData.First().Close;
-                double totalReturn = (currentPrice - initialPrice) / initialPrice;
+                double 當前價格 = 當前數據.Last().收盤價;
+                double 初始價格 = 當前數據.First().收盤價;
+                double 總報酬率 = (當前價格 - 初始價格) / 初始價格;
                 
-                double volatility = FinancialAnalyzer.CalculateVolatility(currentData);
-                double sharpeRatio = FinancialAnalyzer.CalculateSharpeRatio(currentData);
+                double 波動率 = 金融分析器.計算波動率(當前數據);
+                double 夏普比率 = 金融分析器.計算夏普比率(當前數據);
                 
-                double maxPrice = currentData.Max(d => d.Close);
-                double minPrice = currentData.Min(d => d.Close);
-                double avgVolume = currentData.Average(d => d.Volume);
+                double 最高價格 = 當前數據.Max(d => d.收盤價);
+                double 最低價格 = 當前數據.Min(d => d.收盤價);
+                double 平均成交量 = 當前數據.Average(d => d.成交量);
 
                 // 計算最大回撤
-                double maxDrawdown = CalculateMaxDrawdown(currentData);
+                double 最大回撤 = 計算最大回撤(當前數據);
 
                 // 更新統計標籤
-                StringBuilder stats = new StringBuilder();
-                stats.AppendLine("=== 統計資訊 ===");
-                stats.AppendLine($"數據筆數: {currentData.Count:N0}");
-                stats.AppendLine($"期間: {currentData.First().Date:yyyy-MM-dd} 至 {currentData.Last().Date:yyyy-MM-dd}");
-                stats.AppendLine();
-                stats.AppendLine("=== 價格統計 ===");
-                stats.AppendLine($"當前價格: {currentPrice:F2}");
-                stats.AppendLine($"初始價格: {initialPrice:F2}");
-                stats.AppendLine($"總報酬率: {totalReturn:P2}");
-                stats.AppendLine($"最高價格: {maxPrice:F2}");
-                stats.AppendLine($"最低價格: {minPrice:F2}");
-                stats.AppendLine();
-                stats.AppendLine("=== 風險指標 ===");
-                stats.AppendLine($"年化波動率: {volatility:P2}");
-                stats.AppendLine($"夏普比率: {sharpeRatio:F3}");
-                stats.AppendLine($"最大回撤: {maxDrawdown:P2}");
-                stats.AppendLine();
-                stats.AppendLine("=== 交易統計 ===");
-                stats.AppendLine($"平均成交量: {avgVolume:N0}");
+                StringBuilder 統計資訊 = new StringBuilder();
+                統計資訊.AppendLine("=== 統計資訊 ===");
+                統計資訊.AppendLine($"數據筆數: {當前數據.Count:N0}");
+                統計資訊.AppendLine($"期間: {當前數據.First().日期:yyyy-MM-dd} 至 {當前數據.Last().日期:yyyy-MM-dd}");
+                統計資訊.AppendLine();
+                統計資訊.AppendLine("=== 價格統計 ===");
+                統計資訊.AppendLine($"當前價格: {當前價格:F2}");
+                統計資訊.AppendLine($"初始價格: {初始價格:F2}");
+                統計資訊.AppendLine($"總報酬率: {總報酬率:P2}");
+                統計資訊.AppendLine($"最高價格: {最高價格:F2}");
+                統計資訊.AppendLine($"最低價格: {最低價格:F2}");
+                統計資訊.AppendLine();
+                統計資訊.AppendLine("=== 風險指標 ===");
+                統計資訊.AppendLine($"年化波動率: {波動率:P2}");
+                統計資訊.AppendLine($"夏普比率: {夏普比率:F3}");
+                統計資訊.AppendLine($"最大回撤: {最大回撤:P2}");
+                統計資訊.AppendLine();
+                統計資訊.AppendLine("=== 交易統計 ===");
+                統計資訊.AppendLine($"平均成交量: {平均成交量:N0}");
                 
                 // 計算正負報酬率天數
-                var positiveReturns = currentData.Where(d => d.Returns > 0).Count();
-                var negativeReturns = currentData.Where(d => d.Returns < 0).Count();
-                stats.AppendLine($"上漲天數: {positiveReturns}");
-                stats.AppendLine($"下跌天數: {negativeReturns}");
-                if (positiveReturns + negativeReturns > 0)
-                    stats.AppendLine($"勝率: {(double)positiveReturns / (positiveReturns + negativeReturns):P1}");
+                var 上漲天數 = 當前數據.Where(d => d.報酬率 > 0).Count();
+                var 下跌天數 = 當前數據.Where(d => d.報酬率 < 0).Count();
+                統計資訊.AppendLine($"上漲天數: {上漲天數}");
+                統計資訊.AppendLine($"下跌天數: {下跌天數}");
+                if (上漲天數 + 下跌天數 > 0)
+                    統計資訊.AppendLine($"勝率: {(double)上漲天數 / (上漲天數 + 下跌天數):P1}");
 
-                labelStats.Text = stats.ToString();
+                labelStats.Text = 統計資訊.ToString();
             }
             catch (Exception ex)
             {
@@ -354,22 +354,22 @@ namespace WinFormsApp3
             }
         }
 
-        private double CalculateMaxDrawdown(List<FinancialData> data)
+        private double 計算最大回撤(List<金融數據> 數據)
         {
-            double maxDrawdown = 0;
-            double peak = data.First().Close;
+            double 最大回撤 = 0;
+            double 峰值 = 數據.First().收盤價;
 
-            foreach (var item in data)
+            foreach (var 項目 in 數據)
             {
-                if (item.Close > peak)
-                    peak = item.Close;
+                if (項目.收盤價 > 峰值)
+                    峰值 = 項目.收盤價;
 
-                double drawdown = (peak - item.Close) / peak;
-                if (drawdown > maxDrawdown)
-                    maxDrawdown = drawdown;
+                double 回撤 = (峰值 - 項目.收盤價) / 峰值;
+                if (回撤 > 最大回撤)
+                    最大回撤 = 回撤;
             }
 
-            return maxDrawdown;
+            return 最大回撤;
         }
     }
 }
