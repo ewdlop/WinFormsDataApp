@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace WinFormsApp3
 {
@@ -73,7 +66,7 @@ namespace WinFormsApp3
             });
         }
 
-        private void buttonGenerate_Click(object sender, EventArgs e)
+        private void ButtonGenerate_Click(object sender, EventArgs e)
         {
             try
             {
@@ -86,16 +79,11 @@ namespace WinFormsApp3
                 DateTime 開始日期 = DateTime.Today.AddDays(-天數);
 
                 // 根據選擇的模型生成數據
-                if (comboBoxModel.SelectedIndex == 0) // 幾何布朗運動
+                當前數據 = comboBoxModel.SelectedIndex switch // 幾何布朗運動
                 {
-                    當前數據 = 數據生成器.生成幾何布朗運動(
-                        初始價格, 漂移率, 波動率, 天數, 開始日期);
-                }
-                else // Merton跳躍擴散
-                {
-                    當前數據 = 數據生成器.生成默頓跳躍擴散(
-                        初始價格, 漂移率, 波動率, 5.0, -0.02, 0.1, 天數, 開始日期);
-                }
+                    0 => 數據生成器.生成幾何布朗運動(初始價格, 漂移率, 波動率, 天數, 開始日期),
+                    _ => 數據生成器.生成默頓跳躍擴散(初始價格, 漂移率, 波動率, 5.0, -0.02, 0.1, 天數, 開始日期),
+                };
 
                 // 更新顯示
                 更新圖表();
@@ -112,7 +100,7 @@ namespace WinFormsApp3
             }
         }
 
-        private void buttonAnalyze_Click(object sender, EventArgs e)
+        private void ButtonAnalyze_Click(object sender, EventArgs e)
         {
             if (當前數據 == null || !當前數據.Any())
             {
@@ -182,7 +170,7 @@ namespace WinFormsApp3
             pictureBoxChart.Invalidate(); // 觸發重繪
         }
 
-        private void pictureBoxChart_Paint(object sender, PaintEventArgs e)
+        private void PictureBoxChart_Paint(object sender, PaintEventArgs e)
         {
             if (當前數據 == null || !當前數據.Any()) return;
 

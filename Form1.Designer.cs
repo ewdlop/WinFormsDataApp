@@ -78,7 +78,7 @@
             this.pictureBoxChart.Size = new System.Drawing.Size(800, 400);
             this.pictureBoxChart.TabIndex = 0;
             this.pictureBoxChart.TabStop = false;
-            this.pictureBoxChart.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBoxChart_Paint);
+            this.pictureBoxChart.Paint += new System.Windows.Forms.PaintEventHandler(this.PictureBoxChart_Paint);
             // 
             // panelControls
             // 
@@ -120,7 +120,7 @@
             this.buttonGenerate.TabIndex = 10;
             this.buttonGenerate.Text = "生成數據";
             this.buttonGenerate.UseVisualStyleBackColor = true;
-            this.buttonGenerate.Click += new System.EventHandler(this.buttonGenerate_Click);
+            this.buttonGenerate.Click += new System.EventHandler(this.ButtonGenerate_Click);
             // 
             // numericUpDownDays
             // 
@@ -294,7 +294,7 @@
             this.buttonAnalyze.TabIndex = 2;
             this.buttonAnalyze.Text = "執行分析";
             this.buttonAnalyze.UseVisualStyleBackColor = true;
-            this.buttonAnalyze.Click += new System.EventHandler(this.buttonAnalyze_Click);
+            this.buttonAnalyze.Click += new System.EventHandler(this.ButtonAnalyze_Click);
             // 
             // numericUpDownMA
             // 
