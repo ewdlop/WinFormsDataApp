@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WinFormsApp3
+namespace WinFormsApp3.Models
 {
     public class 金融數據
     {

@@ -1,5 +1,8 @@
 using System.Data;
 using System.Text;
+using WinFormsApp3.Models;
+using WinFormsApp3.Services;
+using WinFormsApp3.Strategies;
 
 namespace WinFormsApp3
 {
@@ -8,6 +11,12 @@ namespace WinFormsApp3
         private List<金融數據>? 當前數據;
         private 隨機數據生成器? 數據生成器;
         private List<double>? 移動平均值;
+        
+        // 新增欄位
+        private List<double>? RSI值;
+        private (List<double> MACD, List<double> 信號線, List<double> 直方圖)? MACD數據;
+        private (List<double> 上軌, List<double> 中軌, List<double> 下軌)? 布林通道數據;
+        private 回測結果? 最新回測結果;
 
         public Form1()
         {
@@ -358,6 +367,289 @@ namespace WinFormsApp3
             }
 
             return 最大回撤;
+        }
+
+        // 新增按鈕事件處理器
+        private void Button計算技術指標_Click(object sender, EventArgs e)
+        {
+            if (當前數據 == null || !當前數據.Any())
+            {
+                MessageBox.Show("請先生成數據！", "警告", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                // 計算RSI
+                RSI值 = 金融分析器.計算RSI(當前數據, 14);
+                
+                // 計算MACD
+                MACD數據 = 金融分析器.計算MACD(當前數據, 12, 26, 9);
+                
+                // 計算布林通道
+                布林通道數據 = 金融分析器.計算布林通道(當前數據, 20, 2.0);
+
+                // 更新圖表和統計資訊
+                更新圖表();
+                更新進階統計資訊();
+                
+                MessageBox.Show("技術指標計算完成！", "計算完成", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"計算技術指標時發生錯誤：{ex.Message}", "錯誤", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Button執行回測_Click(object sender, EventArgs e)
+        {
+            if (當前數據 == null || !當前數據.Any())
+            {
+                MessageBox.Show("請先生成數據！", "警告", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                // 使用簡單移動平均交叉策略
+                var 策略 = new 移動平均交叉策略(5, 20);
+                最新回測結果 = 金融分析器.執行簡單回測(當前數據, 策略, 100000);
+
+                // 顯示回測結果
+                ShowBacktestResults(最新回測結果);
+                
+                MessageBox.Show("回測完成！請查看結果視窗。", "回測完成", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"執行回測時發生錯誤：{ex.Message}", "錯誤", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Button匯出數據_Click(object sender, EventArgs e)
+        {
+            if (當前數據 == null || !當前數據.Any())
+            {
+                MessageBox.Show("請先生成數據！", "警告", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (var 儲存對話框 = new SaveFileDialog())
+            {
+                儲存對話框.Filter = "CSV檔案 (*.csv)|*.csv|JSON檔案 (*.json)|*.json";
+                儲存對話框.DefaultExt = "csv";
+                儲存對話框.FileName = $"金融數據_{DateTime.Now:yyyyMMdd}";
+
+                if (儲存對話框.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        string 檔案路徑 = 儲存對話框.FileName;
+                        
+                        if (檔案路徑.EndsWith(".csv"))
+                        {
+                            數據匯出器.匯出CSV(當前數據, 檔案路徑);
+                        }
+                        else if (檔案路徑.EndsWith(".json"))
+                        {
+                            數據匯出器.匯出JSON(當前數據, 檔案路徑);
+                        }
+
+                        MessageBox.Show($"數據已成功匯出至：{檔案路徑}", "匯出完成", 
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"匯出數據時發生錯誤：{ex.Message}", "錯誤", 
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void Button匯出技術指標_Click(object sender, EventArgs e)
+        {
+            if (當前數據 == null || !當前數據.Any())
+            {
+                MessageBox.Show("請先生成數據！", "警告", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (var 儲存對話框 = new SaveFileDialog())
+            {
+                儲存對話框.Filter = "CSV檔案 (*.csv)|*.csv";
+                儲存對話框.DefaultExt = "csv";
+                儲存對話框.FileName = $"技術指標分析_{DateTime.Now:yyyyMMdd}";
+
+                if (儲存對話框.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        數據匯出器.匯出技術指標CSV(當前數據, 移動平均值, RSI值, MACD數據, 布林通道數據, 儲存對話框.FileName);
+                        
+                        MessageBox.Show($"技術指標已成功匯出至：{儲存對話框.FileName}", "匯出完成", 
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"匯出技術指標時發生錯誤：{ex.Message}", "錯誤", 
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void Button產生統計報告_Click(object sender, EventArgs e)
+        {
+            if (當前數據 == null || !當前數據.Any())
+            {
+                MessageBox.Show("請先生成數據！", "警告", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (var 儲存對話框 = new SaveFileDialog())
+            {
+                儲存對話框.Filter = "CSV檔案 (*.csv)|*.csv";
+                儲存對話框.DefaultExt = "csv";
+                儲存對話框.FileName = $"統計報告_{DateTime.Now:yyyyMMdd}";
+
+                if (儲存對話框.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        數據匯出器.匯出統計報告(當前數據, 儲存對話框.FileName);
+                        
+                        MessageBox.Show($"統計報告已成功匯出至：{儲存對話框.FileName}", "匯出完成", 
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"產生統計報告時發生錯誤：{ex.Message}", "錯誤", 
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void ShowBacktestResults(回測結果 結果)
+        {
+            var 回測視窗 = new Form
+            {
+                Text = "回測結果",
+                Size = new Size(600, 400),
+                StartPosition = FormStartPosition.CenterParent
+            };
+
+            var 結果文字 = new TextBox
+            {
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                Dock = DockStyle.Fill,
+                ReadOnly = true,
+                Font = new Font("新細明體", 9)
+            };
+
+            var 結果內容 = new StringBuilder();
+            結果內容.AppendLine("=== 回測結果摘要 ===");
+            結果內容.AppendLine($"初始資金: {結果.初始資金:C0}");
+            結果內容.AppendLine($"最終資產: {結果.最終資產:C0}");
+            結果內容.AppendLine($"總報酬率: {結果.總報酬率:P2}");
+            結果內容.AppendLine($"交易次數: {結果.交易次數}");
+            結果內容.AppendLine($"總手續費: {結果.總手續費:C0}");
+            結果內容.AppendLine();
+            
+            if (結果.交易紀錄.Any())
+            {
+                結果內容.AppendLine("=== 最近10筆交易 ===");
+                var 最近交易 = 結果.交易紀錄.TakeLast(10);
+                foreach (var 交易 in 最近交易)
+                {
+                    結果內容.AppendLine($"{交易.日期:yyyy-MM-dd} {交易.類型} " +
+                                        $"價格:{交易.價格:F2} 數量:{交易.數量:F0} " +
+                                        $"手續費:{交易.手續費:F2}");
+                }
+            }
+
+            結果文字.Text = 結果內容.ToString();
+            回測視窗.Controls.Add(結果文字);
+            回測視窗.ShowDialog();
+        }
+
+        private void 更新進階統計資訊()
+        {
+            if (當前數據 == null || !當前數據.Any()) return;
+
+            try
+            {
+                // 原有統計資訊
+                double 當前價格 = 當前數據.Last().收盤價;
+                double 初始價格 = 當前數據.First().收盤價;
+                double 總報酬率 = (當前價格 - 初始價格) / 初始價格;
+                
+                double 波動率 = 金融分析器.計算波動率(當前數據);
+                double 夏普比率 = 金融分析器.計算夏普比率(當前數據);
+                double 最大回撤 = 計算最大回撤(當前數據);
+
+                // 新增風險指標
+                double VaR95 = 金融分析器.計算VaR(當前數據, 0.95);
+                double CVaR95 = 金融分析器.計算CVaR(當前數據, 0.95);
+                int 最大回撤期間 = 金融分析器.計算最大回撤期間(當前數據);
+
+                // 技術指標統計
+                double 當前RSI = RSI值?.LastOrDefault(x => !double.IsNaN(x)) ?? double.NaN;
+                double 當前MACD = MACD數據?.MACD.LastOrDefault(x => !double.IsNaN(x)) ?? double.NaN;
+
+                StringBuilder 統計資訊 = new StringBuilder();
+                統計資訊.AppendLine("=== 基本統計 ===");
+                統計資訊.AppendLine($"數據筆數: {當前數據.Count:N0}");
+                統計資訊.AppendLine($"期間: {當前數據.First().日期:yyyy-MM-dd} 至 {當前數據.Last().日期:yyyy-MM-dd}");
+                統計資訊.AppendLine($"當前價格: {當前價格:F2}");
+                統計資訊.AppendLine($"總報酬率: {總報酬率:P2}");
+                統計資訊.AppendLine();
+                
+                統計資訊.AppendLine("=== 風險指標 ===");
+                統計資訊.AppendLine($"年化波動率: {波動率:P2}");
+                統計資訊.AppendLine($"夏普比率: {夏普比率:F3}");
+                統計資訊.AppendLine($"最大回撤: {最大回撤:P2}");
+                統計資訊.AppendLine($"VaR(95%): {VaR95:P2}");
+                統計資訊.AppendLine($"CVaR(95%): {CVaR95:P2}");
+                統計資訊.AppendLine($"最大回撤期間: {最大回撤期間} 天");
+                統計資訊.AppendLine();
+                
+                統計資訊.AppendLine("=== 技術指標 ===");
+                if (!double.IsNaN(當前RSI))
+                    統計資訊.AppendLine($"當前RSI: {當前RSI:F2}");
+                if (!double.IsNaN(當前MACD))
+                    統計資訊.AppendLine($"當前MACD: {當前MACD:F4}");
+                
+                if (布林通道數據.HasValue)
+                {
+                    var 布林上軌 = 布林通道數據.Value.上軌.LastOrDefault(x => !double.IsNaN(x));
+                    var 布林下軌 = 布林通道數據.Value.下軌.LastOrDefault(x => !double.IsNaN(x));
+                    if (!double.IsNaN(布林上軌) && !double.IsNaN(布林下軌))
+                    {
+                        統計資訊.AppendLine($"布林上軌: {布林上軌:F2}");
+                        統計資訊.AppendLine($"布林下軌: {布林下軌:F2}");
+                        double 布林位置 = (當前價格 - 布林下軌) / (布林上軌 - 布林下軌);
+                        統計資訊.AppendLine($"布林位置: {布林位置:P1}");
+                    }
+                }
+
+                labelStats.Text = 統計資訊.ToString();
+            }
+            catch (Exception ex)
+            {
+                labelStats.Text = $"統計計算錯誤: {ex.Message}";
+            }
         }
     }
 }

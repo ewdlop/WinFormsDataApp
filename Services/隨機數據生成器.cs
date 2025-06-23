@@ -1,7 +1,10 @@
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Random;
+using System;
+using System.Collections.Generic;
+using WinFormsApp3.Models;
 
-namespace WinFormsApp3
+namespace WinFormsApp3.Services
 {
     public class 隨機數據生成器
     {
