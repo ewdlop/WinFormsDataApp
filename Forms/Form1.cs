@@ -82,6 +82,22 @@ namespace WinFormsApp3
             
             // 初始化數據網格
             設置數據網格();
+            
+            // 確保TableLayoutPanel滾動功能正常
+            設置滾動面板();
+        }
+
+        private void 設置滾動面板()
+        {
+            // 確保TableLayoutPanel可以滾動
+            panelControls.AutoScroll = true;
+            panelControls.AutoScrollMinSize = new Size(panelControls.Width, 600);
+            
+            // 設定滾動條屬性
+            panelControls.HorizontalScroll.Enabled = true;
+            panelControls.VerticalScroll.Enabled = true;
+            panelControls.HorizontalScroll.Visible = true;
+            panelControls.VerticalScroll.Visible = true;
         }
 
         private void 設置數據網格()
