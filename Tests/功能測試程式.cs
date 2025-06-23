@@ -224,5 +224,139 @@ namespace WinFormsApp3.Tests
                 Console.WriteLine();
             }
         }
+
+        public static void 測試新增功能()
+        {
+            Console.WriteLine("=== 新增功能測試 ===");
+            
+            var 數據生成器 = new 隨機數據生成器();
+            var 測試數據 = 數據生成器.生成幾何布朗運動(100, 0.05, 0.2, 100, DateTime.Today.AddDays(-100));
+            
+            Console.WriteLine("1. 測試技術指標計算:");
+            
+            // RSI測試
+            var RSI值 = 金融分析器.計算RSI(測試數據, 14);
+            var 最新RSI = RSI值.LastOrDefault(x => !double.IsNaN(x));
+            Console.WriteLine($"   RSI(14): {最新RSI:F2}");
+            
+            // MACD測試
+            var MACD數據 = 金融分析器.計算MACD(測試數據, 12, 26, 9);
+            var 最新MACD = MACD數據.MACD.LastOrDefault(x => !double.IsNaN(x));
+            var 最新信號線 = MACD數據.信號線.LastOrDefault(x => !double.IsNaN(x));
+            var 最新直方圖 = MACD數據.直方圖.LastOrDefault(x => !double.IsNaN(x));
+            Console.WriteLine($"   MACD: {最新MACD:F4}");
+            Console.WriteLine($"   信號線: {最新信號線:F4}");
+            Console.WriteLine($"   直方圖: {最新直方圖:F4}");
+            
+            // 布林通道測試
+            var 布林通道 = 金融分析器.計算布林通道(測試數據, 20, 2.0);
+            var 最新上軌 = 布林通道.上軌.LastOrDefault(x => !double.IsNaN(x));
+            var 最新中軌 = 布林通道.中軌.LastOrDefault(x => !double.IsNaN(x));
+            var 最新下軌 = 布林通道.下軌.LastOrDefault(x => !double.IsNaN(x));
+            Console.WriteLine($"   布林上軌: {最新上軌:F2}");
+            Console.WriteLine($"   布林中軌: {最新中軌:F2}");
+            Console.WriteLine($"   布林下軌: {最新下軌:F2}");
+            
+            Console.WriteLine();
+            Console.WriteLine("2. 測試回測功能:");
+            
+            var 策略 = new 移動平均交叉策略(5, 20);
+            var 回測結果 = 金融分析器.執行簡單回測(測試數據, 策略, 100000);
+            
+            Console.WriteLine($"   總報酬率: {回測結果.總報酬率:P2}");
+            Console.WriteLine($"   交易次數: {回測結果.交易次數}");
+            Console.WriteLine($"   手續費: {回測結果.總手續費:C0}");
+            
+            Console.WriteLine();
+            Console.WriteLine("3. 測試匯出功能:");
+            
+            try
+            {
+                // 測試CSV匯出
+                數據匯出器.匯出CSV(測試數據, "測試_基本數據.csv");
+                Console.WriteLine("   ✓ CSV基本數據匯出成功");
+                
+                // 測試技術指標匯出
+                數據匯出器.匯出技術指標CSV(測試數據, 
+                    金融分析器.計算移動平均(測試數據, 20), 
+                    RSI值, MACD數據, 布林通道, "測試_技術指標.csv");
+                Console.WriteLine("   ✓ 技術指標匯出成功");
+                
+                // 測試統計報告匯出
+                數據匯出器.匯出統計報告(測試數據, "測試_統計報告.csv");
+                Console.WriteLine("   ✓ 統計報告匯出成功");
+                
+                // 測試回測結果匯出
+                數據匯出器.匯出回測結果(回測結果, "測試_回測結果.csv");
+                Console.WriteLine("   ✓ 回測結果匯出成功");
+                
+                // 測試JSON匯出
+                數據匯出器.匯出JSON(測試數據, "測試_數據.json");
+                Console.WriteLine("   ✓ JSON數據匯出成功");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"   ✗ 匯出測試失敗: {ex.Message}");
+            }
+            
+            Console.WriteLine();
+            Console.WriteLine("4. 圖表功能測試:");
+            Console.WriteLine("   新增功能包括:");
+            Console.WriteLine("   - 布林通道視覺化");
+            Console.WriteLine("   - 交易信號標記");
+            Console.WriteLine("   - 多層次技術指標");
+            Console.WriteLine("   - 改進的網格和標籤");
+            
+            Console.WriteLine();
+            Console.WriteLine("=== 新增功能測試完成 ===");
+        }
+
+        public static void 展示表單新功能()
+        {
+            Console.WriteLine("=== 表單新功能展示 ===");
+            
+            Console.WriteLine("新增的控件組包括:");
+            Console.WriteLine();
+            
+            Console.WriteLine("1. 技術指標組 (groupBoxTechnical):");
+            Console.WriteLine("   - RSI指標選擇");
+            Console.WriteLine("   - MACD指標選擇");
+            Console.WriteLine("   - 布林通道選擇");
+            Console.WriteLine("   - EMA指標選擇和參數設定");
+            Console.WriteLine("   - 計算技術指標按鈕");
+            
+            Console.WriteLine();
+            Console.WriteLine("2. 回測組 (groupBoxBacktest):");
+            Console.WriteLine("   - 短期移動平均天數設定");
+            Console.WriteLine("   - 長期移動平均天數設定");
+            Console.WriteLine("   - 初始資本設定");
+            Console.WriteLine("   - 執行回測按鈕");
+            
+            Console.WriteLine();
+            Console.WriteLine("3. 匯出組 (groupBoxExport):");
+            Console.WriteLine("   - 匯出基本數據按鈕");
+            Console.WriteLine("   - 匯出技術指標按鈕");
+            Console.WriteLine("   - 匯出統計報告按鈕");
+            Console.WriteLine("   - 匯出JSON格式按鈕");
+            
+            Console.WriteLine();
+            Console.WriteLine("4. 圖表增強功能:");
+            Console.WriteLine("   - 多層次技術指標顯示");
+            Console.WriteLine("   - 布林通道視覺化");
+            Console.WriteLine("   - 交易信號點標記");
+            Console.WriteLine("   - 改進的座標軸和網格");
+            Console.WriteLine("   - 動態範圍調整");
+            
+            Console.WriteLine();
+            Console.WriteLine("使用建議:");
+            Console.WriteLine("1. 先生成數據");
+            Console.WriteLine("2. 選擇需要的技術指標並計算");
+            Console.WriteLine("3. 設定回測參數並執行");
+            Console.WriteLine("4. 查看圖表上的視覺化結果");
+            Console.WriteLine("5. 選擇需要的格式匯出數據");
+            
+            Console.WriteLine();
+            Console.WriteLine("=== 表單新功能展示完成 ===");
+        }
     }
 } 

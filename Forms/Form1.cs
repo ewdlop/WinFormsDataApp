@@ -24,6 +24,57 @@ namespace WinFormsApp3
             初始化();
         }
 
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // 確保表單以最大化狀態載入
+            //this.WindowState = FormWindowState.Maximized;
+            
+            // 調整控件位置以適應全屏
+            //AdjustControlsForFullScreen();
+        }
+
+        private void AdjustControlsForFullScreen()
+        {
+            // 重新計算控件位置以適應螢幕大小
+            int screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
+            int screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
+            
+            // 調整圖表大小
+            pictureBoxChart.Width = screenWidth - 630; // 為右側統計區域留空間
+            pictureBoxChart.Height = screenHeight - 280; // 為底部控件面板留空間
+            
+            // 調整統計標籤位置
+            labelStats.Left = pictureBoxChart.Right + 20;
+            labelStats.Width = screenWidth - labelStats.Left - 20;
+            labelStats.Height = (screenHeight - 280) / 2 - 10;
+            
+            // 調整數據網格位置
+            dataGridView1.Left = labelStats.Left;
+            dataGridView1.Top = labelStats.Bottom + 10;
+            dataGridView1.Width = labelStats.Width;
+            dataGridView1.Height = labelStats.Height;
+            
+            // 調整控件面板位置和大小
+            panelControls.Top = pictureBoxChart.Bottom + 10;
+            panelControls.Width = pictureBoxChart.Width;
+            panelControls.Height = 250; // 固定高度以顯示滾動條
+            
+            // 設定控件面板的AutoScrollMinSize以確保滾動功能正常
+            panelControls.AutoScrollMinSize = new Size(760, 610); // 總內容高度約610px
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            // 當窗體大小改變時重新調整控件
+            if (this.WindowState == FormWindowState.Maximized)
+            {
+                //AdjustControlsForFullScreen();
+            }
+            
+            // 重繪圖表以適應新尺寸
+            更新圖表();
+        }
+
         private void 初始化()
         {
             // 初始化數據生成器
@@ -196,94 +247,190 @@ namespace WinFormsApp3
             // 計算數據範圍
             double 最低價格 = 當前數據.Min(d => d.收盤價);
             double 最高價格 = 當前數據.Max(d => d.收盤價);
+            
+            // 如果有技術指標，擴展範圍
+            if (布林通道數據.HasValue)
+            {
+                var 上軌最高 = 布林通道數據.Value.上軌.Where(x => !double.IsNaN(x)).DefaultIfEmpty(最高價格).Max();
+                var 下軌最低 = 布林通道數據.Value.下軌.Where(x => !double.IsNaN(x)).DefaultIfEmpty(最低價格).Min();
+                最高價格 = Math.Max(最高價格, 上軌最高);
+                最低價格 = Math.Min(最低價格, 下軌最低);
+            }
+            
             double 價格範圍 = 最高價格 - 最低價格;
             if (價格範圍 == 0) 價格範圍 = 1;
 
             // 繪製網格線
             using (Pen 網格筆 = new Pen(Color.LightGray, 1))
             {
-                // 水平網格線
-                for (int i = 0; i <= 5; i++)
+                for (int i = 1; i < 10; i++)
                 {
-                    int y = 圖表區域.Top + (圖表區域.Height * i / 5);
+                    int y = 圖表區域.Top + (圖表區域.Height * i / 10);
                     圖形.DrawLine(網格筆, 圖表區域.Left, y, 圖表區域.Right, y);
-
-                    // Y軸標籤
-                    double 價格 = 最高價格 - (價格範圍 * i / 5);
-                    圖形.DrawString(價格.ToString("F1"), SystemFonts.DefaultFont, Brushes.Black, 
-                        圖表區域.Left - 50, y - 7);
                 }
-
-                // 垂直網格線
-                for (int i = 0; i <= 5; i++)
+                
+                for (int i = 1; i < 10; i++)
                 {
-                    int x = 圖表區域.Left + (圖表區域.Width * i / 5);
+                    int x = 圖表區域.Left + (圖表區域.Width * i / 10);
                     圖形.DrawLine(網格筆, x, 圖表區域.Top, x, 圖表區域.Bottom);
                 }
             }
 
-            // 繪製價格線
-            if (當前數據.Count > 1)
+            // 繪製價格軸標籤
+            using (Font 字體 = new Font("Microsoft JhengHei", 8))
+            using (Brush 文字筆刷 = new SolidBrush(Color.Black))
             {
-                List<PointF> 價格點 = new List<PointF>();
+                for (int i = 0; i <= 5; i++)
+                {
+                    double 價格 = 最低價格 + (價格範圍 * i / 5);
+                    int y = 圖表區域.Bottom - (圖表區域.Height * i / 5);
+                    圖形.DrawString(價格.ToString("F1"), 字體, 文字筆刷, 10, y - 6);
+                }
+            }
+
+            // 準備繪製點陣列
+            Point[] 價格點陣列 = new Point[當前數據.Count];
+            for (int i = 0; i < 當前數據.Count; i++)
+            {
+                int x = 圖表區域.Left + (圖表區域.Width * i / (當前數據.Count - 1));
+                int y = 圖表區域.Bottom - (int)((當前數據[i].收盤價 - 最低價格) / 價格範圍 * 圖表區域.Height);
+                價格點陣列[i] = new Point(x, y);
+            }
+
+            // 繪製布林通道（如果有）
+            if (布林通道數據.HasValue)
+            {
+                繪製布林通道(圖形, 圖表區域, 最低價格, 價格範圍);
+            }
+
+            // 繪製主要價格線
+            if (價格點陣列.Length > 1)
+            {
+                圖形.DrawLines(new Pen(Color.Blue, 2), 價格點陣列);
+            }
+
+            // 繪製移動平均線（如果有）
+            if (移動平均值 != null && 移動平均值.Any())
+            {
+                繪製移動平均線(圖形, 圖表區域, 最低價格, 價格範圍);
+            }
+
+            // 繪製EMA線（如果有）
+            if (RSI值 != null && RSI值.Any() && checkBoxEMA?.Checked == true)
+            {
+                // 這裡應該有EMA數據，暫時用移動平均代替演示
+                繪製EMA線(圖形, 圖表區域, 最低價格, 價格範圍);
+            }
+
+            // 繪製交易信號點（如果有回測結果）
+            if (最新回測結果?.交易紀錄 != null)
+            {
+                繪製交易信號(圖形, 圖表區域, 最低價格, 價格範圍);
+            }
+        }
+
+        // 繪製布林通道
+        private void 繪製布林通道(Graphics 圖形, Rectangle 圖表區域, double 最低價格, double 價格範圍)
+        {
+            if (!布林通道數據.HasValue) return;
+
+            var (上軌, 中軌, 下軌) = 布林通道數據.Value;
+            
+            using (Pen 布林筆 = new Pen(Color.Purple, 1))
+            {
+                // 繪製上軌
+                var 上軌點 = new List<Point>();
+                var 下軌點 = new List<Point>();
+                var 中軌點 = new List<Point>();
+
                 for (int i = 0; i < 當前數據.Count; i++)
                 {
-                    float x = 圖表區域.Left + (float)(圖表區域.Width * i / (當前數據.Count - 1));
-                    float y = 圖表區域.Bottom - (float)(圖表區域.Height * (當前數據[i].收盤價 - 最低價格) / 價格範圍);
-                    價格點.Add(new PointF(x, y));
-                }
-
-                if (價格點.Count > 1)
-                {
-                    using (Pen 價格筆 = new Pen(Color.Blue, 2))
+                    int x = 圖表區域.Left + (圖表區域.Width * i / (當前數據.Count - 1));
+                    
+                    if (i < 上軌.Count && !double.IsNaN(上軌[i]))
                     {
-                        圖形.DrawLines(價格筆, 價格點.ToArray());
+                        int y上 = 圖表區域.Bottom - (int)((上軌[i] - 最低價格) / 價格範圍 * 圖表區域.Height);
+                        上軌點.Add(new Point(x, y上));
+                    }
+                    
+                    if (i < 下軌.Count && !double.IsNaN(下軌[i]))
+                    {
+                        int y下 = 圖表區域.Bottom - (int)((下軌[i] - 最低價格) / 價格範圍 * 圖表區域.Height);
+                        下軌點.Add(new Point(x, y下));
+                    }
+                    
+                    if (i < 中軌.Count && !double.IsNaN(中軌[i]))
+                    {
+                        int y中 = 圖表區域.Bottom - (int)((中軌[i] - 最低價格) / 價格範圍 * 圖表區域.Height);
+                        中軌點.Add(new Point(x, y中));
                     }
                 }
-            }
 
-            // 繪製移動平均線
-            if (移動平均值 != null && checkBoxMovingAverage.Checked)
+                // 繪製線條
+                if (上軌點.Count > 1) 圖形.DrawLines(布林筆, 上軌點.ToArray());
+                if (下軌點.Count > 1) 圖形.DrawLines(布林筆, 下軌點.ToArray());
+                if (中軌點.Count > 1) 圖形.DrawLines(new Pen(Color.Orange, 1), 中軌點.ToArray());
+            }
+        }
+
+        // 繪製移動平均線
+        private void 繪製移動平均線(Graphics 圖形, Rectangle 圖表區域, double 最低價格, double 價格範圍)
+        {
+            var MA點陣列 = new List<Point>();
+            
+            for (int i = 0; i < 移動平均值.Count; i++)
             {
-                List<PointF> 移動平均點 = new List<PointF>();
-                for (int i = 0; i < 當前數據.Count; i++)
+                if (!double.IsNaN(移動平均值[i]))
                 {
-                    if (!double.IsNaN(移動平均值[i]))
-                    {
-                        float x = 圖表區域.Left + (float)(圖表區域.Width * i / (當前數據.Count - 1));
-                        float y = 圖表區域.Bottom - (float)(圖表區域.Height * (移動平均值[i] - 最低價格) / 價格範圍);
-                        移動平均點.Add(new PointF(x, y));
-                    }
-                }
-
-                if (移動平均點.Count > 1)
-                {
-                    using (Pen 移動平均筆 = new Pen(Color.Red, 2))
-                    {
-                        移動平均筆.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                        圖形.DrawLines(移動平均筆, 移動平均點.ToArray());
-                    }
+                    int x = 圖表區域.Left + (圖表區域.Width * i / (當前數據.Count - 1));
+                    int y = 圖表區域.Bottom - (int)((移動平均值[i] - 最低價格) / 價格範圍 * 圖表區域.Height);
+                    MA點陣列.Add(new Point(x, y));
                 }
             }
 
-            // 繪製圖例
-            int 圖例Y = 10;
-            圖形.FillRectangle(Brushes.Blue, 10, 圖例Y, 15, 3);
-            圖形.DrawString("收盤價", SystemFonts.DefaultFont, Brushes.Black, 30, 圖例Y - 2);
-
-            if (移動平均值 != null && checkBoxMovingAverage.Checked)
+            if (MA點陣列.Count > 1)
             {
-                using (Pen 圖例筆 = new Pen(Color.Red, 3))
-                {
-                    圖例筆.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                    圖形.DrawLine(圖例筆, 100, 圖例Y + 1, 115, 圖例Y + 1);
-                }
-                圖形.DrawString("移動平均", SystemFonts.DefaultFont, Brushes.Black, 120, 圖例Y - 2);
+                圖形.DrawLines(new Pen(Color.Red, 2) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash }, 
+                              MA點陣列.ToArray());
             }
+        }
 
-            // 軸標籤
-            圖形.DrawString("價格", SystemFonts.DefaultFont, Brushes.Black, 10, 圖表區域.Top + 圖表區域.Height / 2);
-            圖形.DrawString("時間", SystemFonts.DefaultFont, Brushes.Black, 圖表區域.Left + 圖表區域.Width / 2, 圖表區域.Bottom + 20);
+        // 繪製EMA線
+        private void 繪製EMA線(Graphics 圖形, Rectangle 圖表區域, double 最低價格, double 價格範圍)
+        {
+            // 簡化版本，實際應該計算EMA
+            if (移動平均值 != null)
+            {
+                繪製移動平均線(圖形, 圖表區域, 最低價格, 價格範圍);
+            }
+        }
+
+        // 繪製交易信號
+        private void 繪製交易信號(Graphics 圖形, Rectangle 圖表區域, double 最低價格, double 價格範圍)
+        {
+            foreach (var 交易 in 最新回測結果.交易紀錄)
+            {
+                // 找到對應的數據點
+                var 數據點 = 當前數據.FirstOrDefault(d => d.日期.Date == 交易.日期.Date);
+                if (數據點 != null)
+                {
+                    int 索引 = 當前數據.IndexOf(數據點);
+                    int x = 圖表區域.Left + (圖表區域.Width * 索引 / (當前數據.Count - 1));
+                    int y = 圖表區域.Bottom - (int)((交易.價格 - 最低價格) / 價格範圍 * 圖表區域.Height);
+
+                    // 繪製交易信號
+                    if (交易.類型 == 交易信號.買入)
+                    {
+                        圖形.FillEllipse(Brushes.Green, x - 5, y - 5, 10, 10);
+                        圖形.DrawString("買", new Font("Microsoft JhengHei", 8), Brushes.Green, x - 8, y - 20);
+                    }
+                    else if (交易.類型 == 交易信號.賣出)
+                    {
+                        圖形.FillEllipse(Brushes.Red, x - 5, y - 5, 10, 10);
+                        圖形.DrawString("賣", new Font("Microsoft JhengHei", 8), Brushes.Red, x - 8, y - 20);
+                    }
+                }
+            }
         }
 
         private void 更新數據網格()
@@ -649,6 +796,39 @@ namespace WinFormsApp3
             catch (Exception ex)
             {
                 labelStats.Text = $"統計計算錯誤: {ex.Message}";
+            }
+        }
+
+        // 新增的JSON匯出事件處理器
+        private void ButtonExportJSON_Click(object sender, EventArgs e)
+        {
+            if (當前數據 == null || !當前數據.Any())
+            {
+                MessageBox.Show("請先生成數據再進行匯出！", "警告", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                using (var saveDialog = new SaveFileDialog())
+                {
+                    saveDialog.Filter = "JSON files (*.json)|*.json";
+                    saveDialog.DefaultExt = "json";
+                    saveDialog.FileName = $"金融數據_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+
+                    if (saveDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        數據匯出器.匯出JSON(當前數據, saveDialog.FileName);
+                        MessageBox.Show($"JSON數據已成功匯出至：{saveDialog.FileName}", "匯出完成", 
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"匯出JSON時發生錯誤：{ex.Message}", "錯誤", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
