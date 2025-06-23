@@ -127,9 +127,9 @@
             panelControls.Margin = new Padding(4, 5, 4, 5);
             panelControls.Name = "panelControls";
             panelControls.RowCount = 2;
-            panelControls.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            panelControls.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            panelControls.Size = new Size(1142, 415);
+            panelControls.RowStyles.Add(new RowStyle(SizeType.Absolute, 350F));
+            panelControls.RowStyles.Add(new RowStyle(SizeType.Absolute, 250F));
+            panelControls.Size = new Size(1142, 610);
             panelControls.TabIndex = 1;
             // 
             // groupBoxExport
@@ -491,10 +491,10 @@
             // 
             // buttonGenerate
             // 
-            buttonGenerate.Location = new Point(286, 250);
+            buttonGenerate.Location = new Point(260, 290);
             buttonGenerate.Margin = new Padding(4, 5, 4, 5);
             buttonGenerate.Name = "buttonGenerate";
-            buttonGenerate.Size = new Size(129, 30);
+            buttonGenerate.Size = new Size(150, 35);
             buttonGenerate.TabIndex = 10;
             buttonGenerate.Text = "生成數據";
             buttonGenerate.UseVisualStyleBackColor = true;
@@ -552,7 +552,7 @@
             comboBoxModel.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxModel.FormattingEnabled = true;
             comboBoxModel.Items.AddRange(new object[] { "幾何布朗運動", "Merton跳躍擴散" });
-            comboBoxModel.Location = new Point(9, 250);
+            comboBoxModel.Location = new Point(9, 290);
             comboBoxModel.Margin = new Padding(4, 5, 4, 5);
             comboBoxModel.Name = "comboBoxModel";
             comboBoxModel.Size = new Size(241, 33);
@@ -601,7 +601,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(9, 253);
+            label1.Location = new Point(9, 260);
             label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
             label1.Size = new Size(118, 25);
