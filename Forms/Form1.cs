@@ -21,6 +21,9 @@ namespace WinFormsApp3
         // 滑鼠懸停相關
         private ToolTip 圖表提示框;
         private Point 上次滑鼠位置 = Point.Empty;
+        private Point 上次ToolTip位置 = Point.Empty;
+        private Point 十字線位置 = Point.Empty;
+        private bool 顯示十字線 = false;
 
         public Form1()
         {
@@ -83,9 +86,12 @@ namespace WinFormsApp3
             // 初始化圖表提示框
             圖表提示框 = new ToolTip();
             圖表提示框.ShowAlways = true;
-            圖表提示框.AutoPopDelay = 5000;
-            圖表提示框.InitialDelay = 500;
-            圖表提示框.ReshowDelay = 100;
+            圖表提示框.AutoPopDelay = 10000;  // 延長顯示時間
+            圖表提示框.InitialDelay = 100;    // 減少初始延遲
+            圖表提示框.ReshowDelay = 50;      // 減少重新顯示延遲
+            圖表提示框.IsBalloon = false;     // 使用矩形樣式
+            圖表提示框.UseAnimation = false;  // 關閉動畫以提高性能
+            圖表提示框.UseFading = false;     // 關閉淡入淡出效果
             
             // 設置默認值
             comboBoxModel.SelectedIndex = 0; // 默認選擇幾何布朗運動
@@ -389,6 +395,12 @@ namespace WinFormsApp3
             {
                 繪製交易信號(圖形, 圖表區域, 最低價格, 價格範圍);
             }
+            
+            // 繪製十字線（最後繪製，確保在最上層）
+            if (顯示十字線)
+            {
+                繪製十字線(圖形, 圖表區域);
+            }
         }
 
         // 繪製布林通道
@@ -492,6 +504,109 @@ namespace WinFormsApp3
                         圖形.DrawString("賣", new Font("Microsoft JhengHei", 8), Brushes.Red, x - 8, y - 20);
                     }
                 }
+            }
+        }
+
+        // 繪製十字線
+        private void 繪製十字線(Graphics 圖形, Rectangle 圖表區域)
+        {
+            // 檢查十字線位置是否在圖表區域內
+            if (!圖表區域.Contains(十字線位置))
+                return;
+
+            // 使用半透明的十字線，不會太突兀
+            using (Pen 十字線筆 = new Pen(Color.FromArgb(150, Color.DarkGray), 1))
+            {
+                十字線筆.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                
+                // 繪製垂直線
+                圖形.DrawLine(十字線筆, 十字線位置.X, 圖表區域.Top, 十字線位置.X, 圖表區域.Bottom);
+                
+                // 繪製水平線
+                圖形.DrawLine(十字線筆, 圖表區域.Left, 十字線位置.Y, 圖表區域.Right, 十字線位置.Y);
+            }
+
+            // 繪製十字線交叉點的小圓圈，使用更醒目的顏色
+            using (Brush 圓圈筆刷 = new SolidBrush(Color.FromArgb(180, Color.Blue)))
+            using (Pen 圓圈邊框 = new Pen(Color.White, 1))
+            {
+                圖形.FillEllipse(圓圈筆刷, 十字線位置.X - 4, 十字線位置.Y - 4, 8, 8);
+                圖形.DrawEllipse(圓圈邊框, 十字線位置.X - 4, 十字線位置.Y - 4, 8, 8);
+            }
+            
+            // 繪製邊框上的座標標籤
+            if (當前數據 != null && 當前數據.Any())
+            {
+                繪製十字線座標標籤(圖形, 圖表區域);
+            }
+        }
+
+        // 繪製十字線座標標籤
+        private void 繪製十字線座標標籤(Graphics 圖形, Rectangle 圖表區域)
+        {
+            try
+            {
+                // 計算價格範圍
+                double 最低價格 = 當前數據.Min(d => d.收盤價);
+                double 最高價格 = 當前數據.Max(d => d.收盤價);
+                
+                // 如果有技術指標，擴展範圍
+                if (布林通道數據.HasValue)
+                {
+                    var 上軌最高 = 布林通道數據.Value.上軌.Where(x => !double.IsNaN(x)).DefaultIfEmpty(最高價格).Max();
+                    var 下軌最低 = 布林通道數據.Value.下軌.Where(x => !double.IsNaN(x)).DefaultIfEmpty(最低價格).Min();
+                    最高價格 = Math.Max(最高價格, 上軌最高);
+                    最低價格 = Math.Min(最低價格, 下軌最低);
+                }
+                
+                double 價格範圍 = 最高價格 - 最低價格;
+                if (價格範圍 == 0) 價格範圍 = 1;
+
+                // 計算當前滑鼠位置對應的價格
+                double 當前價格 = 最高價格 - ((十字線位置.Y - 圖表區域.Top) / (double)圖表區域.Height) * 價格範圍;
+                
+                // 計算當前滑鼠位置對應的數據索引和日期
+                int 數據索引 = (int)Math.Round((double)(十字線位置.X - 圖表區域.Left) / 圖表區域.Width * (當前數據.Count - 1));
+                數據索引 = Math.Max(0, Math.Min(數據索引, 當前數據.Count - 1));
+                DateTime 當前日期 = 當前數據[數據索引].日期;
+
+                using (Font 標籤字體 = new Font("Microsoft JhengHei", 8))
+                using (Brush 背景筆刷 = new SolidBrush(Color.FromArgb(200, Color.Yellow)))
+                using (Brush 文字筆刷 = new SolidBrush(Color.Black))
+                using (Pen 邊框筆 = new Pen(Color.Gray))
+                {
+                    // Y軸價格標籤
+                    string 價格文字 = 當前價格.ToString("F2");
+                    SizeF 價格尺寸 = 圖形.MeasureString(價格文字, 標籤字體);
+                    Rectangle 價格矩形 = new Rectangle(
+                        圖表區域.Right + 2,
+                        十字線位置.Y - (int)(價格尺寸.Height / 2),
+                        (int)價格尺寸.Width + 4,
+                        (int)價格尺寸.Height + 2
+                    );
+                    
+                    圖形.FillRectangle(背景筆刷, 價格矩形);
+                    圖形.DrawRectangle(邊框筆, 價格矩形);
+                    圖形.DrawString(價格文字, 標籤字體, 文字筆刷, 價格矩形.X + 2, 價格矩形.Y + 1);
+
+                    // X軸日期標籤
+                    string 日期文字 = 當前日期.ToString("MM-dd");
+                    SizeF 日期尺寸 = 圖形.MeasureString(日期文字, 標籤字體);
+                    Rectangle 日期矩形 = new Rectangle(
+                        十字線位置.X - (int)(日期尺寸.Width / 2),
+                        圖表區域.Bottom + 2,
+                        (int)日期尺寸.Width + 4,
+                        (int)日期尺寸.Height + 2
+                    );
+                    
+                    圖形.FillRectangle(背景筆刷, 日期矩形);
+                    圖形.DrawRectangle(邊框筆, 日期矩形);
+                    圖形.DrawString(日期文字, 標籤字體, 文字筆刷, 日期矩形.X + 2, 日期矩形.Y + 1);
+                }
+            }
+            catch
+            {
+                // 如果發生錯誤，忽略座標標籤的繪製
             }
         }
 
@@ -900,27 +1015,42 @@ namespace WinFormsApp3
             if (當前數據 == null || !當前數據.Any())
             {
                 圖表提示框.Hide(pictureBoxChart);
+                顯示十字線 = false;
+                pictureBoxChart.Invalidate();
                 return;
             }
 
-            // 避免頻繁更新
-            if (Math.Abs(e.X - 上次滑鼠位置.X) < 5 && Math.Abs(e.Y - 上次滑鼠位置.Y) < 5)
+            // 計算圖表區域
+            Rectangle 圖表區域 = new Rectangle(60, 30, pictureBoxChart.Width - 80, pictureBoxChart.Height - 60);
+            
+            // 檢查是否在圖表區域內
+            if (圖表區域.Contains(e.Location))
+            {
+                // 更新十字線位置
+                十字線位置 = e.Location;
+                顯示十字線 = true;
+                
+                // 觸發重繪（只在位置變化較大時）
+                if (Math.Abs(e.X - 上次滑鼠位置.X) > 2 || Math.Abs(e.Y - 上次滑鼠位置.Y) > 2)
+                {
+                    pictureBoxChart.Invalidate();
+                    上次滑鼠位置 = e.Location;
+                }
+            }
+            else
+            {
+                // 滑鼠在圖表區域外，隱藏十字線
+                if (顯示十字線)
+                {
+                    顯示十字線 = false;
+                    pictureBoxChart.Invalidate();
+                }
+                圖表提示框.Hide(pictureBoxChart);
                 return;
-
-            上次滑鼠位置 = e.Location;
+            }
 
             try
             {
-                // 計算圖表區域
-                Rectangle 圖表區域 = new Rectangle(60, 30, pictureBoxChart.Width - 80, pictureBoxChart.Height - 60);
-                
-                // 檢查是否在圖表區域內
-                if (!圖表區域.Contains(e.Location))
-                {
-                    圖表提示框.Hide(pictureBoxChart);
-                    return;
-                }
-
                 // 計算數據索引
                 int 數據索引 = (int)Math.Round((double)(e.X - 圖表區域.Left) / 圖表區域.Width * (當前數據.Count - 1));
                 數據索引 = Math.Max(0, Math.Min(數據索引, 當前數據.Count - 1));
@@ -967,8 +1097,29 @@ namespace WinFormsApp3
                     }
                 }
 
-                // 顯示提示框
-                圖表提示框.Show(提示文字.ToString().TrimEnd(), pictureBoxChart, e.X + 15, e.Y - 10);
+                // 在滑鼠位置變化較大時或首次進入時更新ToolTip
+                if (上次ToolTip位置.IsEmpty || Math.Abs(e.X - 上次ToolTip位置.X) > 5 || Math.Abs(e.Y - 上次ToolTip位置.Y) > 5)
+                {
+                    // 計算ToolTip位置，避免與十字線重疊
+                    int toolTipX = e.X + 15;
+                    int toolTipY = e.Y - 10;
+                    
+                    // 如果ToolTip會超出右邊界，顯示在左側
+                    if (toolTipX + 200 > pictureBoxChart.Width)
+                    {
+                        toolTipX = e.X - 220;
+                    }
+                    
+                    // 如果ToolTip會超出上邊界，顯示在下方
+                    if (toolTipY < 0)
+                    {
+                        toolTipY = e.Y + 20;
+                    }
+                    
+                    // 顯示提示框
+                    圖表提示框.Show(提示文字.ToString().TrimEnd(), pictureBoxChart, toolTipX, toolTipY);
+                    上次ToolTip位置 = e.Location;
+                }
             }
             catch (Exception ex)
             {
@@ -979,9 +1130,13 @@ namespace WinFormsApp3
 
         private void PictureBoxChart_MouseLeave(object sender, EventArgs e)
         {
-            // 滑鼠離開圖表區域時隱藏提示框
+            // 滑鼠離開圖表區域時隱藏提示框和十字線
             圖表提示框.Hide(pictureBoxChart);
+            顯示十字線 = false;
             上次滑鼠位置 = Point.Empty;
+            上次ToolTip位置 = Point.Empty;
+            十字線位置 = Point.Empty;
+            pictureBoxChart.Invalidate();
         }
     }
 }
