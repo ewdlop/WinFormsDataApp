@@ -100,6 +100,39 @@ namespace WinFormsApp3
             panelControls.VerticalScroll.Visible = true;
         }
 
+        private void 重置圖表數據()
+        {
+            // 清除所有數據
+            當前數據 = null;
+            移動平均值 = null;
+            RSI值 = null;
+            MACD數據 = null;
+            布林通道數據 = null;
+            最新回測結果 = null;
+            
+            // 清除數據網格
+            dataGridView1.DataSource = null;
+            
+            // 清除統計資訊
+            labelStats.Text = "請先生成數據";
+            
+            // 重繪圖表
+            pictureBoxChart.Invalidate();
+        }
+
+        private void 重置技術指標數據()
+        {
+            // 只清除技術指標相關數據，保留基礎價格數據
+            移動平均值 = null;
+            RSI值 = null;
+            MACD數據 = null;
+            布林通道數據 = null;
+            最新回測結果 = null;
+            
+            // 重繪圖表
+            pictureBoxChart.Invalidate();
+        }
+
         private void 設置數據網格()
         {
             dataGridView1.AutoGenerateColumns = false;
@@ -144,6 +177,9 @@ namespace WinFormsApp3
             try
             {
                 if (數據生成器 == null) return;
+
+                // 重置圖表數據
+                重置圖表數據();
 
                 double 初始價格 = (double)numericUpDownInitialPrice.Value;
                 double 漂移率 = (double)numericUpDownDrift.Value;
@@ -213,6 +249,9 @@ namespace WinFormsApp3
 
             try
             {
+                // 重置技術指標數據（保留基礎數據）
+                重置技術指標數據();
+
                 double 雜訊水平 = (double)numericUpDownNoiseLevel.Value;
                 數據生成器.添加白雜訊(當前數據, 雜訊水平);
 
