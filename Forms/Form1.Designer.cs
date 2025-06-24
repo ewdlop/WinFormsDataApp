@@ -16,6 +16,7 @@
             if (disposing && (components != null))
             {
                 components.Dispose();
+                圖表提示框?.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -106,6 +107,8 @@
             pictureBoxChart.TabIndex = 0;
             pictureBoxChart.TabStop = false;
             pictureBoxChart.Paint += PictureBoxChart_Paint;
+            pictureBoxChart.MouseLeave += PictureBoxChart_MouseLeave;
+            pictureBoxChart.MouseMove += PictureBoxChart_MouseMove;
             // 
             // panelControls
             // 

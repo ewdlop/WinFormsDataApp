@@ -17,13 +17,16 @@ namespace WinFormsApp3
         private (List<double> MACD, List<double> 信號線, List<double> 直方圖)? MACD數據;
         private (List<double> 上軌, List<double> 中軌, List<double> 下軌)? 布林通道數據;
         private 回測結果? 最新回測結果;
+        
+        // 滑鼠懸停相關
+        private ToolTip 圖表提示框;
+        private Point 上次滑鼠位置 = Point.Empty;
 
         public Form1()
         {
             InitializeComponent();
             初始化();
         }
-
         private void Form1_Load(object sender, EventArgs e)
         {
             // 確保表單以最大化狀態載入
@@ -76,6 +79,13 @@ namespace WinFormsApp3
         {
             // 初始化數據生成器
             數據生成器 = new 隨機數據生成器();
+            
+            // 初始化圖表提示框
+            圖表提示框 = new ToolTip();
+            圖表提示框.ShowAlways = true;
+            圖表提示框.AutoPopDelay = 5000;
+            圖表提示框.InitialDelay = 500;
+            圖表提示框.ReshowDelay = 100;
             
             // 設置默認值
             comboBoxModel.SelectedIndex = 0; // 默認選擇幾何布朗運動
@@ -882,6 +892,96 @@ namespace WinFormsApp3
                 MessageBox.Show($"匯出JSON時發生錯誤：{ex.Message}", "錯誤", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        // 滑鼠懸停事件處理器
+        private void PictureBoxChart_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (當前數據 == null || !當前數據.Any())
+            {
+                圖表提示框.Hide(pictureBoxChart);
+                return;
+            }
+
+            // 避免頻繁更新
+            if (Math.Abs(e.X - 上次滑鼠位置.X) < 5 && Math.Abs(e.Y - 上次滑鼠位置.Y) < 5)
+                return;
+
+            上次滑鼠位置 = e.Location;
+
+            try
+            {
+                // 計算圖表區域
+                Rectangle 圖表區域 = new Rectangle(60, 30, pictureBoxChart.Width - 80, pictureBoxChart.Height - 60);
+                
+                // 檢查是否在圖表區域內
+                if (!圖表區域.Contains(e.Location))
+                {
+                    圖表提示框.Hide(pictureBoxChart);
+                    return;
+                }
+
+                // 計算數據索引
+                int 數據索引 = (int)Math.Round((double)(e.X - 圖表區域.Left) / 圖表區域.Width * (當前數據.Count - 1));
+                數據索引 = Math.Max(0, Math.Min(數據索引, 當前數據.Count - 1));
+
+                // 獲取對應的數據點
+                var 數據點 = 當前數據[數據索引];
+                
+                // 建立提示文字
+                StringBuilder 提示文字 = new StringBuilder();
+                提示文字.AppendLine($"日期: {數據點.日期:yyyy-MM-dd}");
+                提示文字.AppendLine($"收盤價: {數據點.收盤價:F2}");
+                提示文字.AppendLine($"報酬率: {數據點.報酬率:P2}");
+                提示文字.AppendLine($"成交量: {數據點.成交量:N0}");
+
+                // 添加移動平均資訊
+                if (移動平均值 != null && 數據索引 < 移動平均值.Count && !double.IsNaN(移動平均值[數據索引]))
+                {
+                    提示文字.AppendLine($"移動平均: {移動平均值[數據索引]:F2}");
+                }
+
+                // 添加技術指標資訊
+                if (RSI值 != null && 數據索引 < RSI值.Count && !double.IsNaN(RSI值[數據索引]))
+                {
+                    提示文字.AppendLine($"RSI: {RSI值[數據索引]:F2}");
+                }
+
+                if (MACD數據.HasValue && 數據索引 < MACD數據.Value.MACD.Count && !double.IsNaN(MACD數據.Value.MACD[數據索引]))
+                {
+                    提示文字.AppendLine($"MACD: {MACD數據.Value.MACD[數據索引]:F4}");
+                    if (數據索引 < MACD數據.Value.信號線.Count && !double.IsNaN(MACD數據.Value.信號線[數據索引]))
+                    {
+                        提示文字.AppendLine($"信號線: {MACD數據.Value.信號線[數據索引]:F4}");
+                    }
+                }
+
+                if (布林通道數據.HasValue && 數據索引 < 布林通道數據.Value.上軌.Count)
+                {
+                    var 上軌值 = 布林通道數據.Value.上軌[數據索引];
+                    var 下軌值 = 布林通道數據.Value.下軌[數據索引];
+                    if (!double.IsNaN(上軌值) && !double.IsNaN(下軌值))
+                    {
+                        提示文字.AppendLine($"布林上軌: {上軌值:F2}");
+                        提示文字.AppendLine($"布林下軌: {下軌值:F2}");
+                    }
+                }
+
+                // 顯示提示框
+                圖表提示框.Show(提示文字.ToString().TrimEnd(), pictureBoxChart, e.X + 15, e.Y - 10);
+            }
+            catch (Exception ex)
+            {
+                // 如果發生錯誤，隱藏提示框
+                圖表提示框.Hide(pictureBoxChart);
+            }
+        }
+
+        private void PictureBoxChart_MouseLeave(object sender, EventArgs e)
+        {
+            // 滑鼠離開圖表區域時隱藏提示框
+            圖表提示框.Hide(pictureBoxChart);
+            上次滑鼠位置 = Point.Empty;
         }
     }
 }
