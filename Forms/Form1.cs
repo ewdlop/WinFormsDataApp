@@ -579,7 +579,7 @@ namespace WinFormsApp3
                     string 價格文字 = 當前價格.ToString("F2");
                     SizeF 價格尺寸 = 圖形.MeasureString(價格文字, 標籤字體);
                     Rectangle 價格矩形 = new Rectangle(
-                        圖表區域.Right + 2,
+                        圖表區域.Left + 2,
                         十字線位置.Y - (int)(價格尺寸.Height / 2),
                         (int)價格尺寸.Width + 4,
                         (int)價格尺寸.Height + 2
@@ -1056,14 +1056,18 @@ namespace WinFormsApp3
                 數據索引 = Math.Max(0, Math.Min(數據索引, 當前數據.Count - 1));
 
                 // 獲取對應的數據點
-                var 數據點 = 當前數據[數據索引];
+                金融數據? 數據點 = 當前數據[數據索引];
                 
                 // 建立提示文字
                 StringBuilder 提示文字 = new StringBuilder();
                 提示文字.AppendLine($"日期: {數據點.日期:yyyy-MM-dd}");
                 提示文字.AppendLine($"收盤價: {數據點.收盤價:F2}");
+                提示文字.AppendLine($"開盤價: {數據點.開盤價:F2}");
+                提示文字.AppendLine($"最高價: {數據點.最高價:F2}");
+                提示文字.AppendLine($"最低價: {數據點.最低價:F2}");
                 提示文字.AppendLine($"報酬率: {數據點.報酬率:P2}");
                 提示文字.AppendLine($"成交量: {數據點.成交量:N0}");
+
 
                 // 添加移動平均資訊
                 if (移動平均值 != null && 數據索引 < 移動平均值.Count && !double.IsNaN(移動平均值[數據索引]))
