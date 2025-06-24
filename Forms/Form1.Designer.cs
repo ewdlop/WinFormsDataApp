@@ -114,7 +114,7 @@
             // 
             panelControls.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panelControls.AutoScroll = true;
-            panelControls.AutoScrollMinSize = new Size(1100, 600);
+            panelControls.AutoScrollMinSize = new Size(1100, 700);
             panelControls.BackColor = Color.LightGray;
             panelControls.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
             panelControls.ColumnCount = 3;
@@ -127,13 +127,13 @@
             panelControls.Controls.Add(groupBoxTechnical, 0, 1);
             panelControls.Controls.Add(groupBoxBacktest, 1, 1);
             panelControls.Controls.Add(groupBoxExport, 2, 1);
-            panelControls.Location = new Point(17, 1000);
+            panelControls.Location = new Point(17, 995);
             panelControls.Margin = new Padding(4, 5, 4, 5);
             panelControls.Name = "panelControls";
             panelControls.RowCount = 2;
             panelControls.RowStyles.Add(new RowStyle(SizeType.Absolute, 376F));
             panelControls.RowStyles.Add(new RowStyle(SizeType.Absolute, 8F));
-            panelControls.Size = new Size(1534, 499);
+            panelControls.Size = new Size(1534, 504);
             panelControls.TabIndex = 1;
             // 
             // groupBoxGenerator
@@ -154,7 +154,7 @@
             groupBoxGenerator.Margin = new Padding(4, 5, 4, 5);
             groupBoxGenerator.Name = "groupBoxGenerator";
             groupBoxGenerator.Padding = new Padding(4, 5, 4, 5);
-            groupBoxGenerator.Size = new Size(513, 366);
+            groupBoxGenerator.Size = new Size(512, 366);
             groupBoxGenerator.TabIndex = 0;
             groupBoxGenerator.TabStop = false;
             groupBoxGenerator.Text = "隨機過程生成器";
@@ -284,11 +284,11 @@
             groupBoxAnalysis.Controls.Add(numericUpDownMA);
             groupBoxAnalysis.Controls.Add(checkBoxMovingAverage);
             groupBoxAnalysis.Dock = DockStyle.Fill;
-            groupBoxAnalysis.Location = new Point(527, 6);
+            groupBoxAnalysis.Location = new Point(526, 6);
             groupBoxAnalysis.Margin = new Padding(4, 5, 4, 5);
             groupBoxAnalysis.Name = "groupBoxAnalysis";
             groupBoxAnalysis.Padding = new Padding(4, 5, 4, 5);
-            groupBoxAnalysis.Size = new Size(486, 366);
+            groupBoxAnalysis.Size = new Size(485, 366);
             groupBoxAnalysis.TabIndex = 1;
             groupBoxAnalysis.TabStop = false;
             groupBoxAnalysis.Text = "技術分析";
@@ -334,11 +334,11 @@
             groupBoxNoise.Controls.Add(numericUpDownNoiseLevel);
             groupBoxNoise.Controls.Add(label6);
             groupBoxNoise.Dock = DockStyle.Fill;
-            groupBoxNoise.Location = new Point(1022, 6);
+            groupBoxNoise.Location = new Point(1020, 6);
             groupBoxNoise.Margin = new Padding(4, 5, 4, 5);
             groupBoxNoise.Name = "groupBoxNoise";
             groupBoxNoise.Padding = new Padding(4, 5, 4, 5);
-            groupBoxNoise.Size = new Size(501, 366);
+            groupBoxNoise.Size = new Size(502, 366);
             groupBoxNoise.TabIndex = 2;
             groupBoxNoise.TabStop = false;
             groupBoxNoise.Text = "雜訊生成";
@@ -390,7 +390,7 @@
             groupBoxTechnical.Margin = new Padding(4, 5, 4, 5);
             groupBoxTechnical.Name = "groupBoxTechnical";
             groupBoxTechnical.Padding = new Padding(4, 5, 4, 5);
-            groupBoxTechnical.Size = new Size(513, 211);
+            groupBoxTechnical.Size = new Size(512, 311);
             groupBoxTechnical.TabIndex = 3;
             groupBoxTechnical.TabStop = false;
             groupBoxTechnical.Text = "技術指標";
@@ -481,11 +481,11 @@
             groupBoxBacktest.Controls.Add(labelLongMA);
             groupBoxBacktest.Controls.Add(labelInitialCapital);
             groupBoxBacktest.Dock = DockStyle.Fill;
-            groupBoxBacktest.Location = new Point(527, 383);
+            groupBoxBacktest.Location = new Point(526, 383);
             groupBoxBacktest.Margin = new Padding(4, 5, 4, 5);
             groupBoxBacktest.Name = "groupBoxBacktest";
             groupBoxBacktest.Padding = new Padding(4, 5, 4, 5);
-            groupBoxBacktest.Size = new Size(486, 211);
+            groupBoxBacktest.Size = new Size(485, 311);
             groupBoxBacktest.TabIndex = 4;
             groupBoxBacktest.TabStop = false;
             groupBoxBacktest.Text = "回測";
@@ -571,11 +571,11 @@
             groupBoxExport.Controls.Add(buttonExportStats);
             groupBoxExport.Controls.Add(buttonExportJSON);
             groupBoxExport.Dock = DockStyle.Fill;
-            groupBoxExport.Location = new Point(1022, 383);
+            groupBoxExport.Location = new Point(1020, 383);
             groupBoxExport.Margin = new Padding(4, 5, 4, 5);
             groupBoxExport.Name = "groupBoxExport";
             groupBoxExport.Padding = new Padding(4, 5, 4, 5);
-            groupBoxExport.Size = new Size(501, 211);
+            groupBoxExport.Size = new Size(502, 311);
             groupBoxExport.TabIndex = 5;
             groupBoxExport.TabStop = false;
             groupBoxExport.Text = "匯出";
@@ -615,7 +615,7 @@
             // 
             // buttonExportJSON
             // 
-            buttonExportJSON.Location = new Point(9, 350);
+            buttonExportJSON.Location = new Point(9, 217);
             buttonExportJSON.Margin = new Padding(4, 5, 4, 5);
             buttonExportJSON.Name = "buttonExportJSON";
             buttonExportJSON.Size = new Size(186, 50);
